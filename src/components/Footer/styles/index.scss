@@ -1,0 +1,36 @@
+/* Основные свойства */
+footer {
+  width: 100%;
+  display: flex;
+  margin-top: auto;
+  position: relative;
+  align-items: center;
+  box-sizing: border-box;
+  height: var(--header_height);
+  justify-content: space-between;
+  background: var(--titlebar_color);
+  cursor: var(--cursor-pointer) !important;
+  border-top: var(--header_outline) var(--titlebar_outline);
+
+  section {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    flex-direction: row;
+    padding-bottom: 0.1rem;
+    justify-content: center;
+    cursor: var(--cursor-pointer) !important;
+
+    &:first-child {
+      padding-left: var(--header-padding);
+      justify-content: flex-start;
+    }
+
+    &:last-child {
+      padding-right: var(--header-padding);
+      justify-content: flex-end;
+    }
+  }
+}

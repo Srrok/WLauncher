@@ -1,0 +1,155 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "wlauncher",
+  "version": "1.0.0",
+  "identifier": "com.srrok.wlauncher",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "https://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../build"
+  },
+  "app": {
+    "windows": [
+      {
+        "width": 840,
+        "height": 540,
+        "center": true,
+        "minWidth": 480,
+        "shadow": false,
+        "minHeight": 320,
+        "focusable": true,
+        "resizable": true,
+        "transparent": true,
+        "fullscreen": false,
+        "decorations": false,
+        "minimizable": true,
+        "maximizable": true,
+        "title": "WLauncher"
+      }
+    ],
+    "security": {
+      "csp": null,
+      "capabilities": [
+        {
+          "identifier": "draggable-window",
+          "windows": ["*"],
+          "permissions": [
+            "os:default",
+            "fs:default",
+            "log:default",
+            "core:default",
+            "store:default",
+            "opener:default",
+            "process:default",
+            "process:allow-exit",
+            "process:allow-restart",
+            "opener:allow-open-path",
+            "core:window:allow-set-focus",
+            "autostart:allow-enable",
+            "autostart:allow-disable",
+            "autostart:allow-is-enabled",
+            "core:window:allow-set-always-on-top",
+            "opener:allow-reveal-item-in-dir",
+            "core:window:allow-start-dragging",
+            "core:window:allow-close",
+            "core:window:allow-minimize",
+            "core:window:allow-maximize",
+            "core:window:allow-unmaximize",
+            "core:window:allow-unminimize",
+            "core:window:allow-show",
+            "core:window:allow-hide",
+            "core:window:allow-set-skip-taskbar",
+            "core:window:allow-set-decorations",
+            "core:window:allow-set-size",
+            "core:window:allow-set-position",
+            "core:window:allow-set-fullscreen",
+            "fs:allow-app-write",
+            "fs:allow-app-write-recursive",
+            "fs:allow-appcache-write",
+            "fs:allow-appcache-write-recursive",
+            "fs:allow-appconfig-write",
+            "fs:allow-appconfig-write-recursive",
+            "fs:allow-appdata-write",
+            "fs:allow-appdata-write-recursive",
+            "fs:allow-applocaldata-write",
+            "fs:allow-applocaldata-write-recursive",
+            "fs:allow-applog-write",
+            "fs:allow-applog-write-recursive",
+            "fs:allow-audio-write",
+            "fs:allow-audio-write-recursive",
+            "fs:allow-cache-write",
+            "fs:allow-cache-write-recursive",
+            "fs:allow-config-write",
+            "fs:allow-config-write-recursive",
+            "fs:allow-create",
+            "fs:allow-data-write",
+            "fs:allow-data-write-recursive",
+            "fs:allow-desktop-write",
+            "fs:allow-desktop-write-recursive",
+            "fs:allow-document-write",
+            "fs:allow-document-write-recursive",
+            "fs:allow-download-write",
+            "fs:allow-download-write-recursive",
+            "fs:allow-exe-write",
+            "fs:allow-exe-write-recursive",
+            "fs:allow-font-write",
+            "fs:allow-font-write-recursive",
+            "fs:allow-home-write",
+            "fs:allow-home-write-recursive",
+            "fs:allow-localdata-write",
+            "fs:allow-localdata-write-recursive",
+            "fs:allow-log-write",
+            "fs:allow-log-write-recursive",
+            "fs:allow-picture-write",
+            "fs:allow-picture-write-recursive",
+            "fs:allow-public-write",
+            "fs:allow-public-write-recursive",
+            "fs:allow-resource-write",
+            "fs:allow-resource-write-recursive",
+            "fs:allow-runtime-write",
+            "fs:allow-runtime-write-recursive",
+            "fs:allow-temp-write",
+            "fs:allow-temp-write-recursive",
+            "fs:allow-template-write",
+            "fs:allow-template-write-recursive",
+            "fs:allow-video-write",
+            "fs:allow-video-write-recursive",
+            "fs:write-all",
+            "fs:write-files",
+            {
+              "identifier": "http:default",
+              "allow": [
+                {"url": "https://*.srrok.ru"},
+                {"url": "https://srrok.ru"}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "plugins": {
+    "updater": {
+      "createUpdaterArtifacts": true,
+      "endpoints": [
+        "https://raw.githubusercontent.com/Srrok/WLauncher/main/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE5Qjc4NTlFMEJCQkVFRDAKUldUUTdyc0xub1czR1RZNzhUQWtCclZ4KzhQYTJHZXN3RFR5RlY5dFFxMTAvcUo5cDI0YU1NNEEK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

@@ -1,0 +1,650 @@
+/* Диалоговое окно */
+div.modal-window {
+  height: auto;
+  resize: both;
+  display: flex;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  position: relative;
+  width: fit-content;
+  height: fit-content;
+  border: var(--outline);
+  box-sizing: border-box;
+  flex-direction: column;
+  min-width: fit-content;
+  background: var(--section_color);
+  box-shadow: var(--standart_shadow);
+  border-radius: var(--dialog_radius);
+
+  /* Общие стили модального окна */
+  div.modal-header, section.modal, form.modal, div.modal {
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+    background: var(--section_color);
+
+    & * {
+      color: var(--main_submenu_color);
+    }
+  }
+
+  /* Шапка диалогового окна */
+  div.modal-header {
+    height: 35px;
+    flex-direction: row;
+    min-height: fit-content;
+    justify-content: space-between;
+    background: var(--section_color);
+    border-bottom: var(--outline);
+
+    i {
+      color: var(--main_submenu_color) !important;
+
+      &, &::before, &::after {
+        color: var(--main_submenu_color) !important;
+      }
+    }
+
+    &.dragging {
+      cursor: var(--cursor-move) !important;
+
+      &, &::before, &::after {
+        cursor: var(--cursor-move) !important;
+      }
+
+      & > *:not(:last-child) {
+        cursor: var(--cursor-move) !important;
+
+        &, &::before, &::after {
+          cursor: var(--cursor-move) !important;
+        }
+      }
+
+      & > *:not(:last-child) * {
+        cursor: var(--cursor-move) !important;
+        
+        &, &::before, &::after {
+          cursor: var(--cursor-move) !important;
+        }
+      }
+    }
+
+    div {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      position: relative;
+      flex-direction: row;
+      align-items: center;
+
+      &:first-child {
+        padding-top: var(--modal-padding);
+        padding-bottom: var(--modal-padding);
+        padding-left: var(--modal-padding);
+        justify-content: flex-start;
+        padding-right: 0;
+        flex: 1;
+      }
+  
+      &:first-child * {
+        margin-right: var(--modal-padding);
+      }
+  
+      &:last-child {
+        justify-content: flex-end;
+        flex-shrink: 0;
+        height: 100%;
+        width: auto;
+      }
+
+      button {
+        width: 30px;
+        height: 100%;
+        padding: 0px;
+        border: none;
+        display: flex;
+        flex-shrink: 0;
+        background: none;
+        font-weight: bolder;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        font-size: var(--base-font-size);
+        transition: all 0.2s ease;
+        border-left: var(--header_outline) solid var(--outline_color);
+        position: relative;
+        overflow: hidden;
+        -webkit-tap-highlight-color: transparent;
+        animation: subtleFadeIn 0.4s ease forwards;
+        opacity: 0;
+        z-index: 1;
+        transform: translateY(-5px);
+
+        &.close i {
+          color: var(--close_button_color);
+
+          &, &::before, &::after {
+            color: var(--close_button_color) !important;
+          }
+        }
+
+        i {
+          color: var(--main_submenu_color) !important;
+          font-family: 'FontAwesome', sans-serif;
+          cursor: var(--cursor-hand) !important;
+          transition: all 0.2s ease;
+          position: relative;
+          z-index: -1;
+
+          &, &::before, &::after {
+            cursor: var(--cursor-hand) !important;
+            color: var(--main_submenu_color) !important;
+          }
+
+          &:hover, &:active {
+            cursor: var(--cursor-hand) !important;
+          }
+        }
+
+        &:active {
+          background: var(--accent_color);
+          transition: background 0.1s ease;
+          cursor: var(--cursor-hand) !important;
+
+          &:active.close {
+            background: var(--red-accent);
+          }
+
+          &::before {
+            opacity: 0.3;
+            width: 100px;
+            height: 100px;
+            cursor: var(--cursor-hand) !important;
+            transition: width 0.3s ease, height 0.3s ease, opacity 0.1s ease;
+          }
+        }
+
+        &:not(:active)::before {
+          width: 0;
+          height: 0;
+          opacity: 0;
+          cursor: var(--cursor-hand) !important;
+          transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+        }
+
+        &:hover {
+          cursor: var(--cursor-hand) !important;
+          background: var(--modal-hover-color);
+        }
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          cursor: var(--cursor-hand) !important;
+          border-radius: 50%;
+          background: var(--accent_color);
+          opacity: 0;
+          transform: translate(-50%, -50%);
+          transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+
+          &::before.close {
+            background-color: var(--red-accent);
+          }
+        }
+
+        &:focus {
+          cursor: var(--cursor-hand) !important;
+          outline: none;
+        }
+
+        &:focus-visible {
+          cursor: var(--cursor-hand) !important;
+          box-shadow: inset 0 0 0 2px var(--accent_color);
+
+          &:focus-visible.close {
+            box-shadow: inset 0 0 0 2px var(--red-accent);
+          }
+        }
+
+        @keyframes subtleFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-5px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      }
+    }
+  }
+
+  /* Секция диалогового окна */
+  section.modal, form.modal, div.modal {
+    border-top: none;
+    overflow: hidden;
+    padding: var(--section-padding);
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+
+    /* Параметры формы */
+    div {
+      position: relative;
+      margin-top: 20px;
+      height: 50px;
+      width: 100%;
+
+      textarea {
+        background-color: var(--modal_color);
+        border-radius: calc(var(--dialog_radius) - 1px);
+        border: 0;
+        box-sizing: border-box;
+        max-height: 300px;
+        font-size: var(--base-font-size);
+        color: var(--main_color);
+        height: 100%;
+        outline: 0;
+        padding: 16px 20px 0;
+        width: 100%;
+        transition: all 0.3s ease;
+        resize: both;
+        min-height: 80px;
+        font-family: inherit;
+        overflow: auto;
+        line-height: 1.4;
+        min-width: 100%;
+        max-width: 100%;
+
+        &::placeholder {
+          color: transparent;
+        }
+
+        &:focus, &:not(:placeholder-shown) {
+          background-color: var(--modal_color);
+        }
+
+        &:focus ~ div.focus, &:not(:placeholder-shown) ~ div.focus {
+          transform: translateY(-9px);
+          opacity: 1;
+        }
+
+        &:not(:focus):placeholder-shown ~ div.focus {
+          opacity: 0;
+          transform: translateY(0);
+        }
+
+        &:focus ~ label, &:not(:placeholder-shown) ~ label {
+          transform: translateY(-31.5px) translateX(10px) scale(0.75);
+        }
+
+        &:not(:placeholder-shown) ~ label {
+          color: var(--main_submenu_color);
+          opacity: 0.7;
+        }
+
+        &:focus ~ label {
+          color: var(--close_button_color);
+        }
+      }
+
+      input:not([type="button"], [type="submit"], [type="reset"]) {
+        background-color: var(--modal_color);
+        border-radius: calc(var(--dialog_radius) - 1px);
+        border: 0;
+        box-sizing: border-box;
+        font-size: var(--base-font-size);
+        color: var(--main_color);
+        height: 100%;
+        outline: 0;
+        padding: 16px 20px 0;
+        width: 100%;
+        transition: all 0.3s ease;
+
+        &::placeholder {
+          color: transparent;
+        }
+
+        &:focus, &:not(:placeholder-shown) {
+          background-color: var(--modal_color);
+        }
+
+        @each $name, $width in ("name": 85px, "email": 55px, "password": 95px) {
+          &[id="#{$name}"] ~ div.focus {
+            width: $width;
+          }
+        }
+
+        &:focus ~ div.focus, &:not(:placeholder-shown) ~ div.focus {
+          transform: translateY(-9px);
+          opacity: 1;
+        }
+
+        &:not(:focus):placeholder-shown ~ div.focus {
+          opacity: 0;
+          transform: translateY(0);
+        }
+
+        &:focus ~ label, &:not(:placeholder-shown) ~ label {
+          transform: translateY(-31.5px) translateX(10px) scale(0.75);
+        }
+
+        &:not(:placeholder-shown) ~ label {
+          color: var(--main_submenu_color);
+          opacity: 0.7;
+        }
+
+        &:focus ~ label {
+          color: var(--close_button_color);
+        }
+      }
+
+      button, input[type="button"], input[type="submit"], input[type="reset"] {
+        border: 0;
+        outline: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        user-select: none;
+        position: relative;
+        text-decoration: none;
+        -ms-user-select: none;
+        -moz-user-select: none;
+        box-sizing: border-box;
+        -webkit-user-select: none;
+        transition: all 0.2s ease;
+        color: var(--main_submenu_color);
+        font-size: var(--base-font-size);
+        cursor: var(--cursor-hand) !important;
+        background-color: var(--button_color);
+        border-radius: calc(var(--dialog_radius) - 1px);
+
+        &:hover:not(.animating) {
+          background-color: var(--button_color);
+          transform: none;
+          box-shadow: none;
+        }
+
+        i {
+          margin-right: var(--modal-padding);
+          pointer-events: none;
+        }
+
+        &:active {
+          transform: scale(0.98);
+          background-color: var(--accent_color);
+          transition: transform 0.1s ease, background-color 0.3s ease;
+        }
+
+        &::before, &::after {
+          content: '';
+          position: absolute;
+          pointer-events: none;
+          border-radius: inherit;
+        }
+
+        &::before {
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: var(--accent_color);
+          opacity: 0;
+          transform: scale(0.8);
+          transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        &::after {
+          top: 50%;
+          left: 50%;
+          width: 0;
+          height: 0;
+          background: rgba(255, 255, 255, 0.5);
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+        }
+
+        &.animating {
+          animation: wave 0.15s ease-out;
+        }
+
+        @keyframes wave {
+          0% {
+            transform: scale(1);
+            background-color: var(--button_color);
+          }
+          30% {
+            transform: scale(0.92);
+            background-color: var(--accent_color);
+          }
+          70% {
+            transform: scale(0.94);
+            background-color: var(--accent_color);
+          }
+          100% {
+            transform: scale(1);
+            background-color: var(--button_color);
+          }
+        }
+      }
+
+      label {
+        color: var(--main_color);
+        left: 20px;
+        line-height: 14px;
+        pointer-events: none;
+        position: absolute;
+        transform-origin: 0 50%;
+        transition: transform 200ms, color 200ms, opacity 200ms;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.6;
+        white-space: nowrap;
+      }
+
+      div.focus {
+        background-color: var(--modal_focus_color);
+        border-radius: 10px;
+        height: 20px;
+        left: 20px;
+        position: absolute;
+        top: -20px;
+        transform: translateY(0);
+        transition: transform 200ms, opacity 200ms;
+        opacity: 0;
+        pointer-events: none;
+        width: 80px;
+        min-width: fit-content;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        &::after {
+          content: attr(data-text);
+          position: absolute;
+          visibility: hidden;
+          white-space: nowrap;
+          font-size: 0.75em;
+          font-weight: bold;
+          padding: 0 8px;
+        }
+      }
+    }
+
+    div:first-child {
+      margin-top: 0;
+    }
+  }
+
+  /* Планшетная версия */
+  @media (max-width: 768px) {
+    section.modal, form.modal, div.modal {
+      padding: calc(var(--section-padding) * 0.8);
+        
+      div {
+        height: 45px;
+        margin-top: 15px;
+        
+        input {
+          padding: 14px 16px 0;
+          font-size: calc(var(--base-font-size) * 0.9);
+          
+          &:focus ~ label, &:not(:placeholder-shown) ~ label {
+            transform: translateY(-28px) translateX(8px) scale(0.75);
+          }
+        }
+
+        textarea {
+          padding: 14px 16px 0;
+          font-size: calc(var(--base-font-size) * 0.9);
+          min-height: 70px;
+          
+          &:focus ~ label, &:not(:placeholder-shown) ~ label {
+            transform: translateY(-28px) translateX(8px) scale(0.75);
+          }
+        }
+        
+        label {
+          left: 16px;
+          font-size: calc(var(--base-font-size) * 0.9);
+        }
+        
+        div.focus {
+          left: 16px;
+          transform: translateY(-8px) scale(0.95);
+        }
+      }
+    }
+  }
+
+  /* Мобильная версия - упрощаем подсказки */
+  @media (max-width: 770px) {
+    section.modal, form.modal, div.modal {
+      padding: calc(var(--section-padding) * 0.6);
+        
+      div {
+        height: 44px;
+        margin-top: 16px;
+
+        textarea {
+          padding: 12px 14px 0;
+          font-size: calc(var(--base-font-size) * 0.85);
+          min-height: 65px;
+            
+          &:focus ~ div.focus, &:not(:placeholder-shown) ~ div.focus {
+            background-color: transparent;
+            width: auto !important;
+            height: auto;
+            padding: 0;
+            min-width: unset;
+          }
+            
+          &:focus ~ label, &:not(:placeholder-shown) ~ label {
+            transform: translateY(-26px) translateX(8px) scale(0.8);
+            color: var(--close_button_color);
+            font-weight: 600;
+            opacity: 1;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+          }
+            
+          &:not(:placeholder-shown) ~ label {
+            color: var(--main_submenu_color);
+            opacity: 0.9;
+          }
+        }
+        
+        input {
+          padding: 12px 14px 0;
+          font-size: calc(var(--base-font-size) * 0.85);
+            
+          &:focus ~ div.focus, &:not(:placeholder-shown) ~ div.focus {
+            background-color: transparent;
+            width: auto !important;
+            height: auto;
+            padding: 0;
+            min-width: unset;
+          }
+            
+          &:focus ~ label, &:not(:placeholder-shown) ~ label {
+            transform: translateY(-26px) translateX(8px) scale(0.8);
+            color: var(--close_button_color);
+            font-weight: 600;
+            opacity: 1;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+          }
+            
+          &:not(:placeholder-shown) ~ label {
+            color: var(--main_submenu_color);
+            opacity: 0.9;
+          }
+        }
+        
+        label {
+          left: 14px;
+          font-size: calc(var(--base-font-size) * 0.85);
+          transition: transform 150ms, color 150ms, opacity 150ms;
+        }
+        
+        div.focus {
+          left: 14px;
+          background: transparent;
+          height: auto;
+          width: auto;
+          transform: translateY(-10px);
+            
+          &::after {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 400px) {
+    section.modal, form.modal, div.modal {
+      padding: 12px;
+    
+      div {
+        height: 42px;
+        margin-top: 14px;
+        
+        input {
+          padding: 10px 12px 0;
+          font-size: calc(var(--base-font-size) * 0.8);
+          
+          &:focus ~ label, &:not(:placeholder-shown) ~ label {
+            transform: translateY(-24px) translateX(6px) scale(0.75);
+          }
+        }
+
+        textarea {
+          padding: 10px 12px 0;
+          font-size: calc(var(--base-font-size) * 0.8);
+          min-height: 60px;
+          
+          &:focus ~ label, &:not(:placeholder-shown) ~ label {
+            transform: translateY(-24px) translateX(6px) scale(0.75);
+          }
+        }
+        
+        label {
+          left: 12px;
+          font-size: calc(var(--base-font-size) * 0.8);
+        }
+        
+        div.focus {
+          left: 12px;
+          transform: translateY(-8px);
+        }
+      }
+    }
+  }
+}

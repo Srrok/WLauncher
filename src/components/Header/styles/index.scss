@@ -1,0 +1,296 @@
+/* Основные свойства */
+header, section.toolbar {
+  z-index: 3;
+  width: 100%;
+  display: flex;
+  position: relative;
+  align-items: center;
+  box-sizing: border-box;
+  height: var(--header_height);
+  justify-content: space-between;
+  background: var(--titlebar_color);
+  cursor: var(--cursor-pointer) !important;
+  border-bottom: var(--header_outline) var(--titlebar_outline);
+  min-width: fit-content;
+}
+
+section.toolbar {
+  background: var(--section_color);
+  height: var(--header_height);
+  margin-top: var(--header_height);
+  justify-content: flex-end;
+  align-items: stretch;
+  position: absolute;
+  margin-left: auto;
+  z-index: 2;
+  right: 0;
+}
+
+header div.label, header div.menu, section.toolbar div.info, section.toolbar div.menu {
+  flex-direction: row;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0;
+  display: flex;
+  flex-shrink: 0;
+  flex-grow: 0;
+  top: 0;
+}
+
+/* Заголовок шапки */
+header div.label {
+  left: 0;
+  width: fit-content;
+  margin-right: auto;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+section.toolbar div.info {
+  padding: 0 var(--header-padding);
+  align-items: center;
+  left: 0;
+}
+
+section.toolbar div.info i {
+  margin-right: var(--header-padding);
+  color: var(--main_submenu_color);
+
+  &, &::before, &::after {
+    cursor: var(--cursor-hand) !important;
+  }
+}
+
+section.toolbar div.info p {
+  margin: 0;
+  padding: 0;
+  display: inline;
+  overflow: hidden;
+  user-select: none;
+  height: min-content;
+  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  color: var(--main_submenu_color);
+  font-size: var(--base-font-size);
+}
+
+header div.label > h1 {
+  user-select: none;
+  height: min-content;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  margin-left: var(--header-padding);
+  margin-right: var(--header-padding);
+  font-size: var(--base-font-size);
+}
+
+header div.label > h1 > span {
+  user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  color: var(--accent_color);
+}
+
+header div.label > img {
+  height: calc(var(--header_height) + var(--header_outline));
+  clip-path: inset(0 0 1.5px 0);
+  width: var(--header_height);
+  margin-right: auto;
+  position: relative;
+  top: 1.5px;
+  left: 0;
+}
+
+/* Меню селектора */
+header div.menu, section.toolbar div.menu {
+  justify-content: flex-end;
+  align-items: stretch;
+  margin-left: auto;
+  height: 100%;
+  right: 0;
+}
+
+header div.menu button, section.toolbar div.menu button {
+  width: 50px;
+  height: 100%;
+  padding: 0px;
+  border: none;
+  display: flex;
+  flex-shrink: 0;
+  background: none;
+  font-weight: bolder;
+  align-items: center;
+  justify-content: center;
+  box-sizing: content-box;
+  font-size: var(--base-font-size);
+  transition: all 0.2s ease;
+  border-left: var(--header_outline) solid var(--titlebar_outline_color);
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  animation: subtleFadeIn 0.4s ease forwards;
+  opacity: 0;
+  z-index: 1;
+  transform: translateY(-5px);
+}
+
+header div.menu button:hover, section.toolbar div.menu button:hover {
+  background: var(--hover-color);
+}
+
+header div.menu button i:hover, header section.toolbar div.menu button i:hover {
+  cursor: var(--cursor-hand) !important;
+
+  &, &::before, &::after {
+    cursor: var(--cursor-hand) !important;
+  }
+}
+
+section.toolbar div.menu button:hover {
+  background: var(--hover-submenu-color);
+}
+
+header div.menu button:active, section.toolbar div.menu button:active {
+  background: var(--accent_color);
+  transition: background 0.1s ease;
+}
+
+header div.menu button:active i, section.toolbar div.menu button:active i {
+  transform: scale(0.9);
+  color: var(--titlebar_color);
+  transition: transform 0.1s ease, color 0.1s ease;
+
+  &, &::before, &::after {
+    cursor: var(--cursor-hand) !important;
+  }
+}
+
+header div.menu button::before, section.toolbar div.menu button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: var(--accent_color);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+}
+
+header div.menu button:active::before, section.toolbar div.menu button:active::before {
+  width: 100px;
+  height: 100px;
+  opacity: 0.3;
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.1s ease;
+}
+
+header div.menu button:not(:active)::before, section.toolbar div.menu button:not(:active)::before {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+}
+
+header div.menu button i, section.toolbar div.menu button i {
+  transition: all 0.2s ease;
+  color: var(--main_color);
+  position: relative;
+  z-index: -1;
+
+  &, &::before, &::after {
+    cursor: var(--cursor-hand) !important;
+  }
+}
+
+section.toolbar div.menu button i {
+  color: var(--main_submenu_color);
+
+  &, &::before, &::after {
+    cursor: var(--cursor-hand) !important;
+  }
+}
+
+header div.menu button.close i {
+  color: var(--close_button_color);
+
+  &, &::before, &::after {
+    color: var(--close_button_color);
+    cursor: var(--cursor-hand) !important;
+  }
+}
+
+header div.menu button.close:active {
+  background: color-mix(in srgb, var(--close_button_color) 30%, black 70%);
+}
+
+header div.menu button.close::before {
+  background: color-mix(in srgb, var(--close_button_color) 20%, black 80%);
+}
+
+header div.menu button.close:active i {
+  color: white;
+
+  &, &::before, &::after {
+    cursor: var(--cursor-hand) !important;
+  }
+}
+
+header div.menu button:focus, section.toolbar div.menu button:focus {
+  outline: none;
+}
+
+header div.menu button:focus-visible, section.toolbar div.menu button:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--accent_color);
+}
+
+@media (max-width: 768px) {
+  header {
+    height: 40px;
+  }
+  
+  header div.menu button, section.toolbar div.menu button {
+    width: 60px;
+    min-width: 60px;
+  }
+  
+  header div.label > h1 {
+    font-size: calc(var(--base-font-size) * 0.9);
+    margin-left: 0.3rem;
+    margin-right: 0.3rem;
+  }
+
+  header div.label > img {
+    height: calc(40px + var(--header_outline));
+    clip-path: inset(0 0 1.5px 0);
+    margin-right: auto;
+    position: relative;
+    width: 40px;
+    top: 1.5px;
+    left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  header div.menu button, section.toolbar div.menu button {
+    width: 50px;
+    min-width: 50px;
+  }
+  
+  header div.label > h1 {
+    font-size: calc(var(--base-font-size) * 0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+}
