@@ -115,6 +115,7 @@
             "fs:allow-template-write-recursive",
             "fs:allow-video-write",
             "fs:allow-video-write-recursive",
+            "updater:default",
             "fs:write-all",
             "fs:write-files",
             {
