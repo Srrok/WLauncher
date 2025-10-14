@@ -1,12 +1,13 @@
 //Библиотеки
 import { exists, create, remove, mkdir, readTextFile, readDir} from "@tauri-apps/plugin-fs"
 import { createEffect, createSignal, JSX, onMount, Suspense, onCleanup } from "solid-js"
+import { saveWindowState, StateFlags } from "@tauri-apps/plugin-window-state"
 import { revealItemInDir as explorer} from "@tauri-apps/plugin-opener"
 import { getCurrentWindow as program } from "@tauri-apps/api/window"
 import { hexToCSSFilter as hexToFilter } from "hex-to-css-filter"
 import { relaunch } from "@tauri-apps/plugin-process"
 import { check } from "@tauri-apps/plugin-updater"
-import { Route, Router } from "@solidjs/router"
+import { A, Route, Router } from "@solidjs/router"
 import { invoke } from "@tauri-apps/api/core"
 import Ajv, { ValidateFunction } from "ajv"
 import { path } from "@tauri-apps/api"
@@ -18,7 +19,7 @@ import "./styles/app.scss"
 
 //Компоненты
 import Header, { Button as HeaderButton } from "./components/Header"
-import Modal, { ModalField } from "./components/Dialog"
+import Modal, { ModalField, ModalRow } from "./components/Dialog"
 import Footer from "./components/Footer"
 
 //Тип темы приложения
@@ -53,13 +54,16 @@ export const configSchema = createValidator<Settings>({
     theme: {type: "string", enum: ["light", "dark"]},
     fullscreen: {type: "boolean"},
     keybinds: {
-      type: "object",
-      properties: {
-        event: {type: "string"},
-        key: {type: "string"}
-      },
-      required: ["event", "key"],
-      additionalProperties: false
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          event: {type: "string"},
+          key: {type: "string"}
+        },
+        required: ["event", "key"],
+        additionalProperties: false
+      }
     }
   },
   required: ["theme", "fullscreen"],
@@ -194,10 +198,33 @@ render(() => <Router root={(props) => <Suspense fallback={((): JSX.Element => {
     //Активное окно
     const active = program()
     //Привязываем обработчик максимального растягивания окна
-    active.listen("tauri://resize", async ({payload}) => {if (!isHandlingResize) {
-      //Вызываем метод расширения экрана
-      await maximize(payload as any)
-    }})
+    active.listen("tauri://resize", async ({payload}) => {if (!isHandlingResize) await maximize(payload as any)})
+    //При запросе на закрытие
+    active.onCloseRequested(async (e) => {
+      //Прерываем обработку
+      e.preventDefault()
+      //Попытка обработки
+      try {
+        //Попытка создать рабочую директорию
+        try {await mkdir(await path.resourceDir())} catch(e) {}
+        //Удаляем предыдущий файл, если существует
+        try {await remove(import.meta.env.PUBLIC_CONFIG_FILE, {baseDir: path.BaseDirectory.Resource})} catch(e) {}
+        //Сохраняем параметры текущего сеанса
+        await create(import.meta.env.PUBLIC_CONFIG_FILE, {baseDir: path.BaseDirectory.Resource}).then(async (file) => {
+          //Записываем контент файла
+          await file.write(new TextEncoder().encode(JSON.stringify({theme: theme(), keybinds: keybinds(), fullscreen: fullscreen()} as Settings, null, 2)))
+          //Закрываем файл
+          await file.close()
+        })
+      } catch (e) {
+        //Выбрасываем ошибку в консоль
+        console.error(`Can"t use current filesystem! Cause: ${e}`)
+      }
+      //Сохраняем состояние окна лаунчера
+      await saveWindowState(StateFlags.DECORATIONS | StateFlags.SIZE | StateFlags.POSITION)
+      //Закрываем окно
+      await invoke("exit")
+    })
     //Получаем исходное скругление окна
     setBorders({radius: document.getElementsByTagName("main")[0].style.borderRadius, border: document.getElementsByTagName("main")[0].style.border})
     //Получаем массив задних фонов
@@ -325,36 +352,12 @@ render(() => <Router root={(props) => <Suspense fallback={((): JSX.Element => {
       </HeaderButton>
       <HeaderButton icon="fa-solid fa-window-minimize" action={async () => await program().minimize()}>Свернуть</HeaderButton>
       <HeaderButton icon="fa-regular fa-square" action={async () => maximize(!fullscreen())}>{fullscreen() ? "Восстановить" : "Развернуть"}</HeaderButton>
-      <HeaderButton icon="fa-solid fa-x" isClose={true} action={async () => {
-        try {
-          //Попытка создать рабочую директорию
-          try {await mkdir(await path.resourceDir())} catch(e) {}
-          //Удаляем предыдущий файл, если существует
-          try {await remove(import.meta.env.PUBLIC_CONFIG_FILE, {baseDir: path.BaseDirectory.Resource})} catch(e) {}
-          //Сохраняем параметры текущего сеанса
-          await create(import.meta.env.PUBLIC_CONFIG_FILE, {baseDir: path.BaseDirectory.Resource}).then(async (file) => {
-            //Записываем контент файла
-            await file.write(new TextEncoder().encode(JSON.stringify({theme: theme(), keybinds: keybinds(), fullscreen: fullscreen()} as Settings, null, 2)))
-            //Закрываем файл
-            await file.close()
-          })
-        } catch (e) {
-          //Выбрасываем ошибку
-          throw new Error(`Can"t use current filesystem! Cause: ${e}`)
-        }
-        //Завершаем работу
-        await invoke("exit")
-      }}>Закрыть</HeaderButton>
+      <HeaderButton icon="fa-solid fa-x" isClose={true} action={async () => await program().close()}>Закрыть</HeaderButton>
     </Header>
-    {isAuth() ? <section class="main">
+    {isAuth() ? <section id={import.meta.env.PUBLIC_ROOT_ELEMENT ?? "window"} class="main">
       
-    </section> : <section class="auth">
-      <Modal title="Регистрация" icon="fa-solid fa-user-pen" type="form" onSubmit={(e: SubmitEvent) => {
-        //Прерываем обработку
-        e.preventDefault()
-      }}>
-        
-      </Modal>
+    </section> : <section id={import.meta.env.PUBLIC_ROOT_ELEMENT ?? "window"} class="auth">
+      
     </section>}
     {isAuth() && <Footer>
       
@@ -362,18 +365,6 @@ render(() => <Router root={(props) => <Suspense fallback={((): JSX.Element => {
   </main>
 }}/></Router>, document.getElementById("root") as HTMLElement)
 /*
-  СДЕЛАТЬ СОХРАНЕНИЕ ПОЗИЦИИ ЗАКРЕПЛЁННЫХ МОДАЛЬНЫХ ОКОН ПРИ ЗАКРЫТИИ ПРИЛОЖЕНИЯ
-  <ModalField id="textarea" kind="textarea" required>Ввод текста</ModalField>
-  <ModalField id="check" type="checkbox" required>Чекбокс</ModalField>
-  <ModalField id="color" type="color" required>Цвет</ModalField>
-  <ModalField id="date" type="date" required>Дата</ModalField>
-  <ModalField id="datetime-local" type="datetime-local" required>Время</ModalField>
-  <ModalField id="file" type="file" required>Файл</ModalField>
-  <ModalField id="image" type="image" required>Изображение</ModalField>
-  <ModalField id="month" type="month" required>Месяц</ModalField>
-  <ModalField id="number" type="number" required>Число</ModalField>
-  <ModalField id="range" type="range" required>Диапазон</ModalField>
-  <ModalField id="search" type="search" required>Поиск</ModalField>
-  <ModalField id="time" type="time" required>Время</ModalField>
-  <ModalField id="week" type="week" required>Неделя</ModalField>
+  СДЕЛАТЬ СОХРАНЕНИЕ ПОЗИЦИИ ЗАКРЕПЛЁННЫХ МОДАЛЬНЫХ ОКОН ПРИ ЗАКРЫТИИ ПРИЛОЖЕНИЯ, СЕРЕАЛИЗАЦИЯ РЕАКТИВНОСТИ
+  <ModalField id="pattern-number" type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>Телефон</ModalField> ДОРАБОТАТЬ ПАТТЕРНЫ И ФЛАГИ НОМЕРОВ ТЕЛЕФОНА
 */

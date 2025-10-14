@@ -72,27 +72,29 @@ try {
   if (existsSync("./latest.json")) unlinkSync("./latest.json")
   //Получаем комментарий к обновлению
   const note = await question(`Введите комментарий к обновлению (по умолчанию «Очередное обновление»): `) ?? "Очередное обновление"
+  //Получаем заданную версию приложения
+  const version = tauri.version.startsWith("v") ? tauri.version : `v${tauri.version}`
   //Записываем шаблон нового файла о новой версии
   writeFileSync("./latest.json", JSON.stringify({
-    version: tauri.version.startsWith("v") ? tauri.version : `v${tauri.version}`,
+    version,
     notes: note,
     pub_date: new Date().toISOString().split('.')[0] + "Z",
     platforms: {
       "darwin-x86_64": {
         signature: "Содержимое файла wlauncher.app.tar.gz.sig",
-        url: `${repoUrl}/releases/download/v1.0.0/wlauncher-x86_64.app.tar.gz`
+        url: `${repoUrl}/releases/download/${version}/wlauncher-x86_64.app.tar.gz`
       },
       "darwin-aarch64": {
         signature: "Содержимое файла wlauncher.app.tar.gz.sig", 
-        url: `${repoUrl}/releases/download/v1.0.0/wlauncher-aarch64.app.tar.gz`
+        url: `${repoUrl}/releases/download/${version}/wlauncher-aarch64.app.tar.gz`
       },
       "linux-x86_64": {
         signature: "Содержимое файла wlauncher.AppImage.tar.gz.sig",
-        url: `${repoUrl}/releases/download/v1.0.0/wlauncher-amd64.AppImage.tar.gz`
+        url: `${repoUrl}/releases/download/${version}/wlauncher-amd64.AppImage.tar.gz`
       },
       "windows-x86_64": {
         signature: "Содержимое файла wlauncher-setup.nsis.zip.sig",
-        url: `${repoUrl}/releases/download/v1.0.0/wlauncher-x64-setup.nsis.zip`
+        url: `${repoUrl}/releases/download/${version}/wlauncher-x64-setup.nsis.zip`
       }
     }
   }, null, 2))

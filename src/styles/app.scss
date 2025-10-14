@@ -39,8 +39,11 @@
   --modal_color: #64646425;
   --modal_focus_color: #303030;
   --accent_color: #4daaf5;
+  --subaccent_color: #326b99;
   --button_color: #4daaf540;
+  --button_red_color: #f54d4d40;
   --main_color: #d9d9d9;
+  --modal_placeholder_color: #494949;
   --main_submenu_color: var(--main_color);
   --background_color: #121212;
   --hover-submenu-color: var(--hover-color);
@@ -51,6 +54,7 @@
   --titlebar_outline: solid var(--titlebar_outline_color);
   --outline: 3px solid var(--outline_color);
   --close_button_color: #c40000;
+  --warning-color: #c48600;
   --red-accent: #610000;
   --hover-color: #2e2e2e;
   --modal-hover-color: #202020;
@@ -58,6 +62,7 @@
   --vignette: rgba(46, 46, 46, 0.4);
   --standart_shadow: 4px 4px 4px 0px #00000040;
   /* Размеры элементов */
+  --base-form-font-size: 10px;
   --base-font-size: 14px;
   --header_outline: 3px;
   --header_height: 32px;
@@ -66,6 +71,7 @@
   --section-padding: 1rem;
   --modal-padding: 0.5rem;
   --dialog_radius: 10px;
+  --modal-gap: 20px;
   /* Файлы курсоров */
   --cursor-pointer: url('/cursor/dark/pointer.cur'), auto;
   --cursor-hand: url('/cursor/dark/hand.cur'), pointer;
@@ -91,6 +97,7 @@
   --modal_color: #a5a5a565;
   --button_color: #0a7cdb40;
   --modal_focus_color: #a5a5a5;
+  --modal_placeholder_color: #494949;
   --background_color: #2e2e2e;
   --main_loading_color: #202020;
   --main_submenu_color: #d9d9d9;

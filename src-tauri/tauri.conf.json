@@ -115,7 +115,12 @@
             "fs:allow-template-write-recursive",
             "fs:allow-video-write",
             "fs:allow-video-write-recursive",
-            "updater:default",
+            "updater:allow-check",
+            "updater:allow-download",
+            "window-state:allow-filename",
+            "window-state:allow-restore-state",
+            "window-state:allow-save-window-state",
+            "updater:allow-install",
             "fs:write-all",
             "fs:write-files",
             {
