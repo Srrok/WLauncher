@@ -64,18 +64,24 @@ theme                  | Переключает тему приложения
 При неправильном назначении типа лаунчер может вызвать ошибку или не запустится вовсе. JSON схема с типами (типы соответствуют TypeScript типам):
 ```
 {
-  "theme": "light" | "dark",
+  "theme": "light" | "dark", //Цветовая схема лаунчера
+  "game": [
+    {
+      path: string, //Путь к игре
+      fullscreen?: boolean //Полноэкранный режим лаунчера при запуске игры
+    }
+  ]
   "keybinds": [
     {
-      "event": string,
-      "key": string
+      "event": string, //Привязанное событие
+      "key": string //Клавиша на событии
     },
     {
-      "event": string,
-      "key": string
+      "event": string, //Привязанное событие
+      "key": string //Клавиша на событии
     }
   ],
-  "fullscreen": boolean
+  "fullscreen": boolean //Полноэкранный режим лаунчера
 }
 ```
 Учтите, что поле ```event``` в ```keybinds``` объекте поддерживает только заранее прописанные события, описания которых представлены выше.  
@@ -83,6 +89,12 @@ theme                  | Переключает тему приложения
 ```JSON
 {
   "theme": "dark",
+  "games": [
+    {
+      "path": "...",
+      "fullscreen": true
+    }
+  ],
   "keybinds": [
     {
       "event": "fullscreen",

@@ -18,11 +18,8 @@ export default function Header(props: {additionalMenu?: JSX.Element, children?: 
   //Донатный баланс
   const [balance, setBalance] = createSignal<number>(0)
 
-  //При инициализации
-  onMount(async () => {
-    //Устанавливаем название приложения
-    setLabel(await getLabel())
-  })
+  //При инициализации устанавливаем название
+  onMount(async () => setLabel(await getLabel()))
 
   //Возвращаем разметку
   return <>

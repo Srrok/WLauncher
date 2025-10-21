@@ -17,15 +17,6 @@ div.modal-window {
   max-width: calc(100% - var(--translate-x, 0px));
   max-height: calc(100% - var(--translate-y, 0px));
 
-  /* Перетаскивание */
-  &.dragging {
-    cursor: var(--cursor-move) !important;
-    
-    &, &::before, &::after, & *, & *::before, & *::after {
-      cursor: var(--cursor-move) !important;
-    }
-  }
-
   /* Заголовок модального окна */
   div.modal-header, section.modal, form.modal, div.modal {
     width: 100%;
@@ -328,22 +319,29 @@ div.modal-window {
       height: max-content;
       width: 100%;
       gap: var(--modal-gap);
+      flex-wrap: wrap;
 
       & > * {
-        margin-top: 0;
-      }
-
-      & *:not(:last-child):not(div div.focus > i) {
-        margin-right: 0;
-      }
-
-      button, input[type="button"], input[type="submit"], input[type="reset"] {
         flex: 1 1 0;
-        min-width: 0;
-        width: auto;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        margin-top: 0;
+        min-width: min-content;
+      }
+
+      & > div {
+        flex: 1 1 0;
+        min-height: 100%;
+        min-width: min-content;
+
+        &:has(button), &:has(input[type="button"]), &:has(input[type="submit"]), &:has(input[type="reset"]) {
+          max-width: min-content;
+        }
+        
+        & > button, & > input[type="button"], & > input[type="submit"], & > input[type="reset"] {
+          width: 100%;
+          flex: 0 1 auto;
+          white-space: normal;
+          min-width: min-content;
+        }
       }
     }
 
@@ -428,6 +426,7 @@ div.modal-window {
 
       & > input[type="color"] {
         overflow: hidden;
+        margin: none;
 
         &, &::after, &::before {
           cursor: var(--cursor-hand) !important;
@@ -436,9 +435,9 @@ div.modal-window {
         &::-webkit-color-swatch {
           border-radius: calc(var(--dialog_radius) - 1px);
           cursor: var(--cursor-hand) !important;
-          height: calc(100% - 4px);
           position: absolute;
           border: none;
+          height: 100%;
           width: 100%;
           left: 0;
           top: 0;
@@ -903,6 +902,17 @@ div.modal-window {
         }
       }
 
+      input[type="password"] {
+        &::after {
+          content: " ";
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          pointer-events: none;
+        }
+      }
+
       input[type="range"] {
         cursor: var(--cursor-hand) !important;
         width: 100%;
@@ -1085,110 +1095,71 @@ div.modal-window {
       button, input[type="button"], input[type="submit"], input[type="reset"] {
         border: 0;
         outline: 0;
-        width: auto;
-        height: auto;
-        min-width: min-content;
-        min-height: 44px;
+        width: 100%;
+        height: 100%;
         overflow: visible;
         user-select: none;
         position: relative;
         text-decoration: none;
+        min-width: min-content;
         box-sizing: border-box;
         -webkit-user-select: none;
         transition: all 0.2s ease;
         color: var(--main_submenu_color);
         font-size: var(--base-font-size);
-        cursor: var(--cursor-hand) !important;
+        min-height: clamp(44px, 8vh, 50px);
         background-color: var(--button_color);
         border-radius: calc(var(--dialog_radius) - 1px);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: inline-flex;
+        padding: 12px 16px;
+        cursor: var(--cursor-hand) !important;
+        box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.7) !important;
+        display: flex;
         align-items: center;
         justify-content: center;
         white-space: nowrap;
-        padding: 12px 16px;
-        flex: 1;
+        flex: 0 1 auto;
+        gap: 8px;
 
-        @media (max-height: 500px) and (orientation: landscape) {
-          min-height: clamp(32px, 5vh, 36px);
-          font-size: calc(var(--base-font-size) * 0.9);
-          padding: 6px 12px;
-        }
-        
         @media (max-width: 768px) {
-          font-size: calc(var(--base-font-size) * 0.95);
-          min-height: clamp(38px, 6.5vh, 42px);
-          padding: 10px 12px;
+          min-height: clamp(42px, 7vh, 45px);
         }
 
         @media (max-width: 480px) {
-          font-size: 16px;
-          min-height: clamp(36px, 6vh, 40px);
-          padding: 8px 10px;
-          white-space: normal;
-          word-break: break-word;
+          min-height: clamp(40px, 6vh, 44px);
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+          min-height: clamp(36px, 5vh, 40px);
         }
 
         &:hover:not(.animating) {
           background-color: var(--subaccent_color);
-        }
-
-        i {
-          margin-right: var(--modal-padding);
-          pointer-events: none;
-          flex-shrink: 0;
-
-          @media (max-width: 480px) {
-            margin-right: 8px;
-          }
+          box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.5) !important;
         }
 
         &:active {
-          transform: scale(0.98);
           background-color: var(--accent_color);
-          transition: transform 0.1s ease, background-color 0.3s ease;
+          box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.6) !important;
+          transform: scale(0.98);
+          transition: transform 0.1s ease, background-color 0.1s ease;
         }
 
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: var(--accent_color);
-          opacity: 0;
-          transform: scale(0.8);
-          transition: opacity 0.3s ease, transform 0.3s ease;
-          border-radius: inherit;
+        & > i {
+          flex-shrink: 0;
+          color: var(--main_submenu_color) !important;
+          font-family: 'FontAwesome', sans-serif;
+          transition: all 0.2s ease;
+
+          &, &::after, &::before {
+            color: var(--main_submenu_color) !important;
+          }
         }
 
-        &.animating {
-          animation: wave 0.15s ease-out;
-        }
-        
-        &.red {
-          background-color: var(--button_red_color);
-
-          &:active, &::before {
-            background-color: var(--red_accent);
-          }
-
-          &:hover:not(.animating) {
-            background-color: var(--red-accent);
-          }
-
-          &.animating {
-            animation: redWave 0.15s ease-out;
-          }
-
-          @keyframes redWave {
-            0% { transform: scale(1); background-color: var(--button_red_color); }
-            30% { transform: scale(0.92); background-color: var(--red-accent); }
-            70% { transform: scale(0.94); background-color: var(--red-accent); }
-            100% { transform: scale(1); background-color: var(--button_red_color); }
-          }
+        & > span {
+          flex: 1;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
         }
       }
 

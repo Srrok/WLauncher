@@ -26,6 +26,12 @@ tauri-plugin-process = "2"
 tauri-plugin-store = "2"
 tauri-plugin-log = "2"
 tauri-plugin-window-state = "2.4.0"
+tauri-plugin-shell = "2"
+winapi = { version = "0.3", features = ["winuser", "processthreadsapi", "winnt"] }
+windows = { version = "0.52", features = [
+  "Win32_Foundation",
+  "Win32_UI_WindowsAndMessaging",
+] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-autostart = "2"

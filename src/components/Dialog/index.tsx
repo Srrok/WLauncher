@@ -1,28 +1,44 @@
 //Библиотеки
 import { JSX, createSignal, onMount, onCleanup, createEffect, splitProps } from "solid-js"
 import { getCurrentWindow as program } from "@tauri-apps/api/window"
+import IMask from "imask"
 
 //Стили диалогового окна
 import "./styles/index.scss"
 import { render } from "solid-js/web"
 
+//Тип типа диалогового окна
+export type DialogTypes = "form" | "div" | "section" | "browser" | "preview"
+
 //Тип диалогового окна
 export type DialogType = (JSX.HTMLAttributes<HTMLDivElement> | JSX.HTMLAttributes<HTMLFormElement> | JSX.HTMLAttributes<HTMLElement>) & {
   style?: JSX.CSSProperties & {"header-color": string}
-  type?: "form" | "div" | "section",
+  type?: DialogTypes,
   title?: string,
   window?: {
     pinnable?: boolean,
     resizable?: boolean,
     draggable?: boolean,
     center?: boolean,
+    random?: boolean,
     toolbar?: {
       close?: boolean | Required<JSX.CustomEventHandlersCamelCase<HTMLButtonElement>>["onClick"],
       minimize?: boolean,
       maximize?: boolean
     } | boolean
   }
-} & ({title: string} & {icon?: string} | {title?: undefined} & {icon?: never})
+} & ({title: string} & {icon?: string} | {title?: undefined} & {icon?: never}) & ({type: "browser", browser: {lang?: string, pages: Array<{
+  isHomepage?: boolean,
+  type?: "public" | "local",
+  title?: string,
+  icon?: {
+    type: "fontawesome" | "path",
+    icon: string
+  }
+} & ({type: "public", link: string} | {type: "local", doc: string | JSX.Element | Array<JSX.Element>} | {type?: undefined, link: never, doc: never})>}} | 
+{type?: Omit<DialogTypes, "browser">, browser?: never}) & ({type: "preview", model: {
+  /* ТИП ДЛЯ ПРОСМОТРА 3D МОДЕЛЕЙ И МЕДИА */
+}} | {type?: Omit<DialogTypes, "preview">, model?: never})
 
 //Тип координат
 export type CoordinatesType = {x: number, y: number}
@@ -226,8 +242,32 @@ export const Prompt = {
 
 //Линейный ряд элементов окна
 export const ModalRow = (props: {children: JSX.Element}) => {
+  //Ссылка на строку
+  let row: HTMLElement | undefined
+
+  //При монтировании
+  onMount(() => {
+    //Если нет строки - выходим
+    if (!row) return undefined
+    //Получаем массив контейнеров
+    const containers = Array.from(row.children as HTMLCollectionOf<HTMLElement>).filter(element => element.tagName.toLowerCase() === "div")
+    //Если кол-во не совпало - выходим
+    if (row.children.length !== containers.length) return undefined
+    //Получаем массивы элементов, содержащих в себе разные типы кнопок
+    const buttons = Array.from(containers.map(element => element.children)).map(element => Array.from(element as HTMLCollectionOf<HTMLElement>)).filter(element => {
+      //Возвращаем результат, если указана классическая кнопка
+      if (element.length === 1 && element[0].tagName.toLowerCase() === "button") return true
+      //Возвращаем результат, если указано поле - кнопка
+      if (element.length === 2 && element[0].tagName.toLowerCase() === "input" && ["button", "submit", "reset"].includes((element[0] as HTMLInputElement).type)) return true
+    }).map(element => element[0])
+    //Если массив пуст или кол-во детей не равно кол-ву контейнеров - выходим
+    if (buttons.length === 0 || buttons.length !== containers.length) return undefined
+    //Убираем максимальную ширину у кнопок
+    buttons.forEach(element => (element.parentElement as HTMLDivElement).style.maxWidth = "none")
+  })
+
   //Возвращаем результат
-  return <section class="row">
+  return <section ref={row} class="row">
     {props.children}
   </section>
 }
@@ -253,7 +293,7 @@ type InputProps = {
 type ButtonProps = {
   icon?: string,
   kind?: "button",
-  children: string,
+  children?: string,
   type?: Required<JSX.ButtonHTMLAttributes<HTMLButtonElement>["type"]>
 } & Omit<JSX.ButtonHTMLAttributes<HTMLButtonElement>, "children">
 
@@ -287,7 +327,7 @@ export const ModalField = (props: TextareaProps | InputProps | ButtonProps) => {
       }
     }}/> : (isButton(props) ? <button 
       {...splitProps(props, ["icon", "kind"])[1]}
-      title={props.children}
+      title={props.children ?? props.title}
       value={props.children}
       type={props.type ?? "button"}
       onMouseDown={(e) => {
@@ -348,6 +388,25 @@ export const ModalField = (props: TextareaProps | InputProps | ButtonProps) => {
       placeholder={props.children ?? " "}
       type={props.type ?? "text"}
       {...props.id && {id: props.id, name: props.id}}
+      {...(props.type === "tel") && {
+        onInput: (e) => {
+          //Создаём маску ввода телефона
+          const mask = IMask(e.target, {mask: e.target.pattern.trim().length === 0 ? "+{7} (000) 000-00-00" : e.target.pattern})
+          //Если есть пользовательское событие
+          if (props.onInput) {
+            //Вызываем пользовательский обработчик после собственного
+            if (typeof props.onInput === 'function') props.onInput(e)
+            else if (Array.isArray(props.onInput)) {
+              //Получаем обработчик и аргумент
+              const [handler, arg] = props.onInput
+              //Вызываем событие
+              handler(arg, e)
+            }
+          }
+          //При очистке удаляем маску
+          onCleanup(() => mask.destroy())
+        }
+      }}
       {...["submit", "reset", "button"].includes(props.type ?? "text") && {
         title: props.children,
         value: props.children,
@@ -421,7 +480,9 @@ export const ModalField = (props: TextareaProps | InputProps | ButtonProps) => {
     {(!["submit", "reset", "button"].includes(props.type ?? "text") && props.kind !== "button") && <>
       <div class="focus">
         {(props.icon || ["search", "file"].includes(props.type ?? "text")) && <i class={props.icon ?? (props.type === "search" ? "fa-solid fa-magnifying-glass" : "fa-solid fa-folder-open")}/>}
-        <label for={props.id}>{props.children}</label>
+        <label for={props.id}>{(!isButton(props) && (props.required ?? false) === true) && <span><b style={{
+          color: "var(--close_button_color)"
+        }}>*</b></span>} {props.children}</label>
       </div>
     </>}
   </div>
@@ -451,6 +512,7 @@ export default function Modal(props: DialogType) {
     draggable: props.window?.draggable ?? true,
     pinnable: props.window?.pinnable ?? true,
     center: props.window?.center ?? false,
+    random: props.window?.random ?? true,
     toolbar: {
       close: typeof props.window?.toolbar !== "boolean" ? (props.window?.toolbar?.close ?? true) : props.window.toolbar,
       minimize: typeof props.window?.toolbar !== "boolean" ? (props.window?.toolbar?.minimize ?? true) : props.window.toolbar,
@@ -471,7 +533,8 @@ export default function Modal(props: DialogType) {
     resizable: props.window?.resizable ?? true,
     draggable: props.window?.draggable ?? true,
     pinnable: props.window?.pinnable ?? true,
-    center: props.window?.center ?? true,
+    center: props.window?.center ?? false,
+    random: props.window?.random ?? true,
     toolbar: {
       close: typeof props.window?.toolbar !== "boolean" ? (props.window?.toolbar?.close ?? true) : props.window.toolbar,
       minimize: typeof props.window?.toolbar !== "boolean" ? (props.window?.toolbar?.minimize ?? true) : props.window.toolbar,
@@ -481,15 +544,22 @@ export default function Modal(props: DialogType) {
 
   //Функция для обновления относительной позиции
   const updateRelativePosition = () => {
-    //Если нет модального окна - выходим
+    //Если нет модального окна
     if (!modalRef) return
-    //Получаем коллайдеры окна и родителя
+    //Получаем родительский контейнер
+    const parent = modalRef.parentElement
+    //Если нет родителя
+    if (!parent) return
+    //Получаем реальные размеры
     const modalRect = modalRef.getBoundingClientRect()
-    const parentRect = modalRef.parentElement?.getBoundingClientRect() || {width: window.innerWidth, height: window.innerHeight, left: 0, top: 0}
+    const parentRect = parent.getBoundingClientRect()
+    //Получаем доступные размеры окна
+    const availableWidth = Math.max(1, parentRect.width - modalRect.width)
+    const availableHeight = Math.max(1, parentRect.height - modalRect.height)
     //Выставляем относительную позицию
     setRelativePosition({
-      x: Math.max(0, Math.min(1, position().x / Math.max(1, parentRect.width - modalRect.width))),
-      y: Math.max(0, Math.min(1, position().y / Math.max(1, parentRect.height - modalRect.height)))
+      x: availableWidth > 0 ? Math.max(0, Math.min(1, position().x / availableWidth)) : 0.5,
+      y: availableHeight > 0 ? Math.max(0, Math.min(1, position().y / availableHeight)) : 0.5
     })
   }
 
@@ -500,19 +570,24 @@ export default function Modal(props: DialogType) {
     //Получаем родительский и собственный коллайдеры
     const modalRect = modalRef.getBoundingClientRect()
     const parentRect = modalRef.parentElement?.getBoundingClientRect() || {width: window.innerWidth, height: window.innerHeight, left: 0, top: 0}
+    //Ограничиваем размер окна размером родительского контейнера
+    const constrainedWidth = Math.min(modalRect.width, parentRect.width - safeMargin * 2)
+    const constrainedHeight = Math.min(modalRect.height, parentRect.height - safeMargin * 2)
     //Вычисляем доступную область для позиционирования с учетом отступов
-    const availableWidth = Math.max(0, parentRect.width - modalRect.width - safeMargin * 2)
-    const availableHeight = Math.max(0, parentRect.height - modalRect.height - safeMargin * 2)
+    const availableWidth = Math.max(0, parentRect.width - constrainedWidth - safeMargin * 2)
+    const availableHeight = Math.max(0, parentRect.height - constrainedHeight - safeMargin * 2)
     //Вычисляем центр безопасной зоны
     const centerX = safeMargin + availableWidth / 2
     const centerY = safeMargin + availableHeight / 2   
     //Возвращаем ответ
     return {
       x: Math.max(safeMargin, Math.min(
-        centerX + ((Math.random() - 0.5) * Math.min(availableWidth * 0.3, availableWidth / 2) * 2), parentRect.width - modalRect.width - safeMargin
+        centerX + ((Math.random() - 0.5) * Math.min(availableWidth * 0.3, availableWidth / 2) * 2), 
+        parentRect.width - constrainedWidth - safeMargin
       )),
       y: Math.max(safeMargin, Math.min(
-        centerY + ((Math.random() - 0.5) * Math.min(availableHeight * 0.3, availableHeight / 2) * 2), parentRect.height - modalRect.height - safeMargin
+        centerY + ((Math.random() - 0.5) * Math.min(availableHeight * 0.3, availableHeight / 2) * 2), 
+        parentRect.height - constrainedHeight - safeMargin
       ))
     }
   }
@@ -521,15 +596,45 @@ export default function Modal(props: DialogType) {
   const centerModal = () => {
     //Если нет окна или полноэкранный - возвращаем
     if (!modalRef || isFullscreen()) return
-    //Получаем родительский и собственный коллайдеры
+    //Получаем родительский элемент
+    const parent = modalRef.parentElement
+    //Если нет родителя
+    if (!parent) return
+    //Получаем вычисленные стили для учета границ и отступов
+    const parentStyle = window.getComputedStyle(parent)
+    const modalStyle = window.getComputedStyle(modalRef)
+    //Вычисляем реальные доступные размеры с учетом отступов и барьеров
+    const parentPaddingLeft = parseFloat(parentStyle.paddingLeft) || 0
+    const parentPaddingRight = parseFloat(parentStyle.paddingRight) || 0
+    const parentPaddingTop = parseFloat(parentStyle.paddingTop) || 0
+    const parentPaddingBottom = parseFloat(parentStyle.paddingBottom) || 0
+    //Вычисляем реальные доступные размеры с учетом отступов и барьеров
+    const modalMarginLeft = parseFloat(modalStyle.marginLeft) || 0
+    const modalMarginRight = parseFloat(modalStyle.marginRight) || 0
+    const modalMarginTop = parseFloat(modalStyle.marginTop) || 0
+    const modalMarginBottom = parseFloat(modalStyle.marginBottom) || 0
+    //Реальные размеры с учетом всех отступов
+    const parentRect = parent.getBoundingClientRect()
     const modalRect = modalRef.getBoundingClientRect()
-    const parentRect = modalRef.parentElement?.getBoundingClientRect() || {width: window.innerWidth, height: window.innerHeight, left: 0, top: 0}
-    //Устанавливаем позицию по центру для окна
-    setPosition({x: (parentRect.width - modalRect.width) / 2, y: (parentRect.height - modalRect.height) / 2})
+    //Получаем доступные размеры родителя
+    const availableWidth = parentRect.width - parentPaddingLeft - parentPaddingRight
+    const availableHeight = parentRect.height - parentPaddingTop - parentPaddingBottom
+    //Ограничиваем размер окна доступным пространством
+    const constrainedWidth = Math.min(modalRect.width, availableWidth)
+    const constrainedHeight = Math.min(modalRect.height, availableHeight)
+    //Вычисляем позицию с учетом всех отступов
+    const result = {
+      x: Math.min(Math.max(parentPaddingLeft, (availableWidth - constrainedWidth) / 2 + parentPaddingLeft - modalMarginLeft), parentRect.width - constrainedWidth - parentPaddingRight + modalMarginRight),
+      y: Math.min(Math.max(parentPaddingTop, (availableHeight - constrainedHeight) / 2 + parentPaddingTop - modalMarginTop), parentRect.height - constrainedHeight - parentPaddingBottom + modalMarginBottom)
+    }
+    //Устанавливаем позицию
+    setPosition(result)
     //Обновляем относительную позицию
     setRelativePosition({x: 0.5, y: 0.5})
     //Окно было центрировано
     setWasCentered(true)
+    //Принудительно обновляем стили для точного позиционирования
+    if (modalRef) modalRef.style.transform = `translate(${result.x}px, ${result.y}px)`
   }
 
   //При инициализации
@@ -546,7 +651,7 @@ export default function Modal(props: DialogType) {
       if (modal().center) {
         //Центрируем окно
         centerModal()
-      } else {
+      } else if (modal().random) {
         //Устанавливаем случайную позицию
         setPosition(getRandomPosition())
         //Обновляем относительную позицию
@@ -667,18 +772,41 @@ export default function Modal(props: DialogType) {
       if (!isDragging() || !modalRef) return
       //Если перетащили - не считать центрированным
       if (wasCentered()) setWasCentered(false)
-      //Получаем родительский и собственный коллайдеры
-      const parentRect = modalRef.parentElement?.getBoundingClientRect() || {width: window.innerWidth, height: window.innerHeight, left: 0, top: 0}
+      //Получаем родительский элемент и его стили
+      const parent = modalRef.parentElement
+      //Если нет родителя
+      if (!parent) return
+      //Получаем стили и коллайдеры родителя и окна
+      const parentStyle = window.getComputedStyle(parent)
+      const parentRect = parent.getBoundingClientRect()
       const modalRect = modalRef.getBoundingClientRect()
-      //Устанавливаем позицию
-      const newX = Math.max(0, Math.min(e.clientX - dragOffset().x - parentRect.left, parentRect.width - modalRect.width))
-      const newY = Math.max(0, Math.min(e.clientY - dragOffset().y - parentRect.top, parentRect.height - modalRect.height))
+      //Учитываем отступы родителя
+      const parentPaddingLeft = parseFloat(parentStyle.paddingLeft) || 0
+      const parentPaddingRight = parseFloat(parentStyle.paddingRight) || 0
+      const parentPaddingTop = parseFloat(parentStyle.paddingTop) || 0
+      const parentPaddingBottom = parseFloat(parentStyle.paddingBottom) || 0
+      //Вычисляем доступную область с учетом отступов
+      const availableWidth = parentRect.width - parentPaddingLeft - parentPaddingRight
+      const availableHeight = parentRect.height - parentPaddingTop - parentPaddingBottom
+      //Устанавливаем позицию с учетом границ
+      const result = {
+        x: Math.max(parentPaddingLeft, Math.min(
+          e.clientX - dragOffset().x - parentRect.left, 
+          parentRect.width - modalRect.width - parentPaddingRight
+        )),
+        y: Math.max(parentPaddingTop, Math.min(
+          e.clientY - dragOffset().y - parentRect.top, 
+          parentRect.height - modalRect.height - parentPaddingBottom
+        ))
+      }
+      //Принудительно выставляем позицию элемента
+      modalRef.style.transform = `translate(${result.x}px, ${result.y}px)`
       //Выставляем позицию окна
-      setPosition({x: newX, y: newY})
+      setPosition(result)
       //Обновляем относительную позицию
       setRelativePosition({
-        x: newX / Math.max(1, parentRect.width - modalRect.width),
-        y: newY / Math.max(1, parentRect.height - modalRect.height)
+        x: result.x / Math.max(1, availableWidth - modalRect.width),
+        y: result.y / Math.max(1, availableHeight - modalRect.height)
       })
     }
     
@@ -688,23 +816,37 @@ export default function Modal(props: DialogType) {
     //Событие изменения размера окна
     const handleResize = () => {
       //Если не указано окно или включен полноэкранный режим
-      if (!modalRef || isFullscreen()) return;
+      if (!modalRef || isFullscreen() || (!modal().center && !modal().random && !modal().draggable)) return
       //Если окно было центрировано
       if (wasCentered()) {
-        //Центрируем окно
-        centerModal()
+        //Центрируем окно после задержки
+        setTimeout(() => centerModal(), 10)
       } else {
-        //Получаем коллайдеры окна и родителя
+        //Получаем родительский контейнер
+        const parent = modalRef.parentElement
+        //Если нет родителя
+        if (!parent) return
+        //Получаем стили и коллайдеры родителя и окна
+        const parentStyle = window.getComputedStyle(parent)
         const modalRect = modalRef.getBoundingClientRect()
-        const parentRect = modalRef.parentElement?.getBoundingClientRect() || {width: window.innerWidth, height: window.innerHeight, left: 0, top: 0}
-        //Получаем доступную ширину и длинну
-        const availableWidth = Math.max(1, parentRect.width - modalRect.width)
-        const availableHeight = Math.max(1, parentRect.height - modalRect.height)
+        const parentRect = parent.getBoundingClientRect()
+        //Учитываем отступы родителя
+        const parentPaddingLeft = parseFloat(parentStyle.paddingLeft) || 0
+        const parentPaddingRight = parseFloat(parentStyle.paddingRight) || 0
+        const parentPaddingTop = parseFloat(parentStyle.paddingTop) || 0
+        const parentPaddingBottom = parseFloat(parentStyle.paddingBottom) || 0
+        //Доступные размеры родительского окна
+        const availableWidth = Math.max(1, parentRect.width - modalRect.width - parentPaddingLeft - parentPaddingRight)
+        const availableHeight = Math.max(1, parentRect.height - modalRect.height - parentPaddingTop - parentPaddingBottom)
+        //Позиция с учетом относительного положения
+        const result = {
+          x: Math.max(parentPaddingLeft, Math.min(relativePosition().x * availableWidth + parentPaddingLeft, parentRect.width - modalRect.width - parentPaddingRight)),
+          y: Math.max(parentPaddingTop, Math.min(relativePosition().y * availableHeight + parentPaddingTop, parentRect.height - modalRect.height - parentPaddingBottom))
+        }
         //Выставляем позицию
-        setPosition({
-          x: Math.max(0, Math.min(relativePosition().x * availableWidth, availableWidth)),
-          y: Math.max(0, Math.min(relativePosition().y * availableHeight, availableHeight))
-        })
+        setPosition(result)
+        //Принудительно обновляем стили
+        if (modalRef) modalRef.style.transform = `translate(${result.x}px, ${result.y}px)`
       }
     }
     
@@ -763,7 +905,7 @@ export default function Modal(props: DialogType) {
   const hasHeader = Object.values(modal().toolbar).some(v => v !== false) || modal().pinnable || props.title !== undefined
 
   //Возвращаем разметку диалогового окна
-  return <div ref={modalRef} class="modal-window" datatype-resize={modalRef ? window.getComputedStyle(modalRef).resize : "both"} style={{
+  return <div ref={modalRef} class={props.class ? `modal-window ${props.class}` : "modal-window"} {...Object.fromEntries(Object.entries(props).filter(([key]) => key in ({} as JSX.HTMLAttributes<HTMLDivElement>)))} title={undefined} datatype-resize={modalRef ? window.getComputedStyle(modalRef).resize : "both"} {...(modal().center || modal().random || modal().draggable) && {style: {
     transform: isFullscreen() ? "none" : `translate(${position().x}px, ${position().y}px)`,
     ...(isResizing() && !isFullscreen() && {
       "--translate-x": `${position().x}px`,
@@ -772,7 +914,7 @@ export default function Modal(props: DialogType) {
     position: "absolute",
     left: "0",
     top: "0"
-  }} classList={{"pinned": isPinned(), "fullscreen": isFullscreen(), "resizable": startup.resizable && !isFullscreen(), "draggable": startup.draggable && !isFullscreen()}} onMouseDown={(e) => {
+  }}} classList={{"pinned": isPinned(), "fullscreen": isFullscreen(), "resizable": startup.resizable && !isFullscreen(), "draggable": startup.draggable && !isFullscreen()}} onMouseDown={(e) => {
     //Если нет окна или включен полноэкранный режим - выходим
     if (!modalRef || isFullscreen()) return undefined
     //Получаем размеры окна и родителя
@@ -836,12 +978,14 @@ export default function Modal(props: DialogType) {
       })
       //Возвращаем разметку
       return <div classList={{"modal-header": true, "dragging": isDragging()}} onMouseDown={(e: MouseEvent) => dragEvent(e, true)}>
-        {((props.title && props.icon) || props.title) ? <div class="info">
-          {props.icon && <i {...props.style?.["header-color"] && {style: {
+        {(((props.title && props.icon) || props.title) || ["browser", "preview"].includes(props.type ?? "div")) ? <div class="info">
+          {(props.icon || ["browser", "preview"].includes(props.type ?? "div")) && <i {...props.style?.["header-color"] && {style: {
             color: props.style["header-color"],
             "--icon-color": props.style["header-color"]
-          }}} class={props.icon}/>}
-          <h1 {...props.style?.["header-color"] && {style: {color: props.style["header-color"]}}}>{props.title}</h1>
+          }}} class={(props.type === "browser" ? (props.icon ?? "fa-brands fa-chrome") : (props.type === "preview" ? "fa-solid fa-cube" : props.icon))}/>}
+          <h1 {...props.style?.["header-color"] && {style: {color: props.style["header-color"]}}}>
+            {props.title ?? (props.type === "browser" ? "Браузер" : (props.type === "preview" ? "Превью" : undefined))}
+          </h1>
         </div> : (() => {
           //Устанавливаем сигнал
           setInfoState(false)
@@ -996,18 +1140,19 @@ export default function Modal(props: DialogType) {
       //Возвращаем диалоговое окно
       switch(props.type ?? "div") {
         //Диалоговое окно - контейнер
-        case "div": return <div class={props.class ? `modal ${props.class}` : "modal"} {...Object.fromEntries(Object.entries(props).filter(([key]) => key in ({} as JSX.HTMLAttributes<HTMLDivElement>)))} title={undefined}>
+        case "div": return <div class="modal">
           {props.children}
         </div>
         //Диалоговое окно - форма
-        case "form": return <form class={props.class ? `modal ${props.class}` : "modal"} {...Object.fromEntries(Object.entries(props).filter(([key]) => key in ({} as JSX.HTMLAttributes<HTMLFormElement>)))} title={undefined}>
+        case "form": return <form class="modal">
           {props.children}
         </form>
         //Диалоговое окно - секция
-        case "section": return <section class={props.class ? `modal ${props.class}` : "modal"} {...Object.fromEntries(Object.entries(props).filter(([key]) => key in ({} as JSX.HTMLAttributes<HTMLElement>)))} title={undefined}>
+        case "section": return <section class="modal">
           {props.children}
         </section>
       }
+      /* ДОПИСАТЬ ОКНО БРАУЗЕРА И 3D ПРЕВЬЮ */
     })()}
   </div>
 }
