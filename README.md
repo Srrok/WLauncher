@@ -26,6 +26,8 @@ sudo dpkg -i wlauncher_1.0.0_amd64.deb
 ```Bash
 sudo rpm -i wlauncher_1.0.0_amd64.deb
 ```
+## 📽 Скриншот лаунчера:  
+![Скриншот лаунчера](https://downloader.disk.yandex.ru/preview/2872677962a502d3efa8e4c1bfd0c6f948d4fbc7564d177fc2c63e409d30f407/68f80c6b/IuGgNmPPbkEio_gDZbSclt-IFrVgeMu8oyS6tJzwnH33hNUkrWV-34K7E3WEl5zDvfKSw4tkG4TsKm6RlWlqew%3D%3D?uid=0&filename=4.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v3&size=411x840)
 
 # 🔌 Поддерживаемые платформы
 Некоторые из наших продуктов доступны на разных устройствах. Наш лаунчер доступен для скачиваения на следующих платформах:
