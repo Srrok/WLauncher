@@ -1,0 +1,108 @@
+/* Уведомление */
+label.notify {
+  /* Анимации */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-15px);
+    }
+  }
+
+  /* Стили */
+  div.alert {
+    position: relative;
+    top: 10;
+    left: 0;
+    width: auto;
+    height: auto;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    color: var(--fixed_white);
+    animation: slideIn 0.3s cubic-bezier(0.25, 0.8, 0.5, 1) forwards;
+    transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+    cursor: var(--cursor-hand) !important;
+
+    &:hover {
+      cursor: var(--cursor-hand) !important;
+
+      *, *::before, *:active {
+        cursor: var(--cursor-hand) !important;
+      }
+    }
+
+    &.info {
+      background-color: var(--info-color-transparent);
+      border: 1px solid var(--info-color);
+      color: var(--fixed_white);
+    }
+    
+    &.success {
+      background-color: var(--success-color-transparent);
+      border: 1px solid var(--success-color);
+      color: var(--fixed_white);
+    }
+    
+    &.notice {
+      background-color: var(--notice-color-transparent);
+      border: 1px solid var(--notice-color);
+      color: var(--fixed_white);
+    }
+    
+    &.warning {
+      background-color: var(--warning-color-transparent);
+      border: 1px solid var(--warning-color);
+      color: var(--fixed_white);
+    }
+    
+    &.error {
+      background-color: var(--button_red_color);
+      border: 1px solid var(--close_button_color);
+      color: var(--fixed_white);
+    }
+  }
+  
+  input.alertCheckbox:checked + div.alert {
+    animation: slideOut 0.3s cubic-bezier(0.25, 0.8, 0.5, 1) forwards;
+  }
+  
+  input.alertCheckbox {
+    color: var(--fixed_white);
+    display: none;
+  }
+  
+  span.alertText {
+    color: var(--fixed_white);
+    display: table;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 16px;
+  }
+  
+  span.alertClose {
+    color: var(--fixed_white);
+    float: right;
+    padding-top: 5px;
+    font-size: 10px;
+  }
+  
+  br.clear {
+    color: var(--fixed_white);
+    clear: both;
+  }
+}

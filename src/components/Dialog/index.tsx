@@ -56,15 +56,9 @@ export const Alert = {
     type="div"
     class={props.type ?? "notify"}
     {...props.type !== "notify" && {style: (() => {switch (props.type) {
-      case "warn": return {
-        "header-color": "var(--warning-color)"
-      }
-      case "error": return {
-        "header-color": "var(--close_button_color)"
-      }
-      default: return {
-        "header-color": "var(--main_submenu_color)"
-      }
+      case "warn": return {"header-color": "var(--warning-color)"}
+      case "error": return {"header-color": "var(--close_button_color)"}
+      default: return {"header-color": "var(--main_submenu_color)"}
     }})()}}
     title={props.title ?? ((field: string = props.type ?? "notify") => {switch (field) {
       case "error": return "Ошибка"
@@ -94,9 +88,9 @@ export const Alert = {
   },
 
   //Вспомогательные методы для частых случаев
-  notify: (message: string, title?: string) => Alert.show(message, {type: "notify", title}),
-  warn: (message: string, title?: string) => Alert.show(message, {type: "warn", title: title ?? "Предупреждение"}),
-  error: (message: string, title?: string) => Alert.show(message, {type: "error", title: title ?? "Ошибка"})
+  notify: (message: string, props?: {title?: string, parent?: HTMLElement | JSX.Element} & ({title: string} | {parent: HTMLElement | JSX.Element})) => Alert.show(message, {type: "notify", ...(props?.parent && {parent: props.parent}), ...(props?.title && {title: props.title})}),
+  warn: (message: string, props?: {title?: string, parent?: HTMLElement | JSX.Element} & ({title: string} | {parent: HTMLElement | JSX.Element})) => Alert.show(message, {type: "warn", ...(props?.parent && {parent: props.parent}), title: props?.title ?? "Предупреждение"}),
+  error: (message: string, props?: {title?: string, parent?: HTMLElement | JSX.Element} & ({title: string} | {parent: HTMLElement | JSX.Element})) => Alert.show(message, {type: "error", ...(props?.parent && {parent: props.parent}), title: props?.title ?? "Ошибка"}),
 }
 
 //Базовое подтверждение

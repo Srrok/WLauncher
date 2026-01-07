@@ -16,7 +16,7 @@
 - [x] Выбор версий для игр, где это возможно
 - [x] Автообновление лаунчера и игр
 
-Лаунчер доступен для скачивания из данного репозитория в разделе релизов, на [официальном сайте](https://wogs.srrok.ru) проекта, а также 
+Лаунчер доступен для скачивания из данного репозитория в разделе релизов, на [официальном сайте](https://wogs.srrok.ru/wlauncher) проекта, а также 
 через [PlayMarket](https://play.google.com/store/apps/details?id=wlauncher&hl=ru) или [AppStore](https://apps.apple.com/ru/app/wogs/id123456789).  
 Для Debian/Ubuntu Linux лаунчер также можно загрузить командой
 ```Bash
@@ -47,6 +47,7 @@ PUBLIC_BACKGROUND_TIME | Задержка смены заднего фона    
 PUBLIC_DOMAIN          | Сервер авторизации                  | Да          | wogs.srrok.ru | string
 PUBLIC_ROOT_ELEMENT    | ID элемента рабочего стола лаунчера | Нет         | window        | string
 PUBLIC_KEY_FULLSCREEN  | Клавиша максимизации по умолчанию   | Нет         | F11           | string
+DEV_HOST               | Домен хоста сервера                 | Нет         | -             | string
 PUBLIC_KEY_THEME       | Клавиша смены темы по умолчанию     | Нет         | F8            | string    
 
 Примечание: Имена переменных конфигурации с префиксом ```PUBLIC_``` или ```VITE_``` доступны во FrontEnd части приложения и клиент, 

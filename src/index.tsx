@@ -20,7 +20,8 @@ import "./styles/app.scss"
 
 //Компоненты
 import Header, { Button as HeaderButton } from "./components/Header"
-import Modal, { Alert, ModalField, ModalRow } from "./components/Dialog"
+import Modal, { ModalField, ModalRow } from "./components/Dialog"
+import { Notify } from "./components/Notify"
 import Footer from "./components/Footer"
 
 //Тип темы приложения
@@ -420,6 +421,19 @@ render(() => <Router root={(props) => <Suspense fallback={((): JSX.Element => {
       <button ref={button} onClick={async () => {
         //Если нет компонента окна - выходим
         if (!mainRef) return undefined
+        //Получаем игровой процесс
+        const other = gameStarted()
+        //Если игра запущена
+        if (other) {
+          //Выводим ошибку клиенту
+          Notify.error("Игра уже была запущена!", {timeout: 3000})
+          //Выбрасываем ошибку
+          console.error(`The gameplay has already started as ${other}`)
+          //Блокируем выполнение
+          return undefined
+        }
+        //Устанавливаем блок
+        setGameStarted(-1)
         //Формируем путь к игре
         const game = `${`${await path.resourceDir()}\\games`}\\${props.path.replace(/^[/\\]/, "").replace("/", "\\")}`
         //Если директории игры не существует
@@ -427,12 +441,9 @@ render(() => <Router root={(props) => <Suspense fallback={((): JSX.Element => {
           /* СДЕЛАТЬ ПРОЦЕСС СКАЧИВАНИЯ СБОРКИ */
         }
         //Функция для проверки существования процесса
-        const isProcessRunning = async (pid: number): Promise<boolean> => {
-          //Возвращаем результат проверки процесса
-          try {return await invoke<boolean>("process_running", {pid})} catch (error) {return false}
-        }
+        const isProcessRunning = async (pid: number) => {try {return await invoke<boolean>("process_running", {pid})} catch (error) {return false}}
         //Получаем отступы сверху и снизу
-        const padding = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header_height').trim().replace("px", ""))
+        const padding = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--header_height").trim().replace("px", ""))
         //Получаем параметр полноэкранного режима
         const isFullscreen = games().find(item => item.path === game)?.fullscreen ?? false
         //Выставляем новые параметры
@@ -454,13 +465,13 @@ render(() => <Router root={(props) => <Suspense fallback={((): JSX.Element => {
         //Выставляем флаг запуска
         setGameStarted(pid)
         //Создаём интервал обзвона процесса на предмет активности в случае, если игра запущена
-        const checker = setIntervalAsync(async () => {const isRunning = await isProcessRunning(pid); if (gameStarted() && !isRunning) {
+        const checker = setIntervalAsync(async () => {if (gameStarted() && !(await isProcessRunning(pid))) {
           //Отключаем процесс игры
           setGameStarted(undefined)
           //Удаляем таймер
           await clearIntervalAsync(checker)
         }}, 1)
-      }}>
+      }}>                                                                                                
         <i class="fa-solid fa-play"/>
       </button>
     </div>

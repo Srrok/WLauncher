@@ -62,10 +62,10 @@ async fn spawn(window: tauri::Window, path: String, header_height: Option<u32>, 
             //Игнор безопасности
             unsafe {
                 //Библиотеки
+                use winapi::um::winuser::{SWP_NOACTIVATE, SWP_FRAMECHANGED, SWP_NOZORDER, GWL_EXSTYLE, WS_EX_LAYERED, WS_EX_TRANSPARENT, GWL_STYLE, WS_CAPTION, WS_THICKFRAME, WS_POPUP, LWA_ALPHA};
                 use winapi::um::winuser::{EnumWindows, GetWindowThreadProcessId, SetParent, IsWindowVisible, SetWindowPos, GetWindowLongPtrW, SetWindowLongPtrW, GetClientRect, MoveWindow};
-                use winapi::um::winuser::{SWP_NOACTIVATE, SWP_FRAMECHANGED, SWP_NOZORDER};
-                use winapi::um::winuser::{GWL_STYLE, WS_CAPTION, WS_THICKFRAME, WS_POPUP};
                 use winapi::shared::minwindef::{BOOL, DWORD, LPARAM};
+                use winapi::um::winuser::SetLayeredWindowAttributes;
                 use winapi::shared::basetsd::LONG_PTR;
                 use winapi::shared::windef::RECT;
                 //Структура для передачи данных
@@ -115,6 +115,9 @@ async fn spawn(window: tauri::Window, path: String, header_height: Option<u32>, 
                     SetWindowLongPtrW(enum_data.found_hwnd, GWL_STYLE, style & !(WS_CAPTION | WS_THICKFRAME | WS_POPUP) as LONG_PTR);
                     //Устанавливаем родителя
                     SetParent(enum_data.found_hwnd, parent_hwnd);
+                    //Блокируем прозрачность дочернего окна
+                    SetWindowLongPtrW(enum_data.found_hwnd, GWL_EXSTYLE, GetWindowLongPtrW(enum_data.found_hwnd, GWL_EXSTYLE) & !(WS_EX_LAYERED | WS_EX_TRANSPARENT) as LONG_PTR);
+                    SetLayeredWindowAttributes(enum_data.found_hwnd, 0, 255, LWA_ALPHA);
                     //Используем точное позиционирование и измененяем размер
                     MoveWindow(enum_data.found_hwnd, -2, y_offset, width + 4, content_height, 1);
                     //Принудительно обновляем окно
@@ -183,6 +186,9 @@ async fn spawn(window: tauri::Window, path: String, header_height: Option<u32>, 
                             SetWindowLongPtrW(retry_data.found_hwnd, GWL_STYLE, style & !(WS_CAPTION | WS_THICKFRAME | WS_POPUP) as LONG_PTR);
                             //Устанавливаем родителя
                             SetParent(retry_data.found_hwnd, parent_hwnd);
+                            //Блокируем прозрачность дочернего окна
+                            SetWindowLongPtrW(retry_data.found_hwnd, GWL_EXSTYLE, GetWindowLongPtrW(retry_data.found_hwnd, GWL_EXSTYLE) & !(WS_EX_LAYERED | WS_EX_TRANSPARENT) as LONG_PTR);
+                            SetLayeredWindowAttributes(retry_data.found_hwnd, 0, 255, LWA_ALPHA);
                             //Используем точное позиционирование и измененяем размер
                             MoveWindow(retry_data.found_hwnd, -2, y_offset, width + 4, content_height, 1);
                             //Принудительно обновляем окно

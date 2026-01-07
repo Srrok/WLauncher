@@ -43,6 +43,7 @@
   --button_color: #4daaf540;
   --button_red_color: #f54d4d40;
   --main_color: #d9d9d9;
+  --fixed_white: #d9d9d9;
   --slist-outline: #222325;
   --modal_placeholder_color: #494949;
   --main_submenu_color: var(--main_color);
@@ -55,7 +56,14 @@
   --titlebar_outline: solid var(--titlebar_outline_color);
   --outline: 3px solid var(--outline_color);
   --close_button_color: #c40000;
-  --warning-color: #c48600;
+  --warning-color-transparent: #b3770040;
+  --warning-color: #b37700;
+  --success-color-transparent: #2e7d3240;
+  --success-color: #2e7d32;
+  --notice-color-transparent: #41414140;
+  --notice-color: #414141;
+  --info-color-transparent: #50505040;
+  --info-color: #505050;
   --red-accent: #610000;
   --hover-color: #2e2e2e;
   --modal-hover-color: #202020;
@@ -91,12 +99,15 @@
 /* Светлая тема */
 :root[data-theme="light"] {
   /* Цветовая палитра */
+  --fixed_white: #d9d9d9;
   --titlebar_color: #f0f0f0;
   --section_color: #f0f0f040;
   --accent_color: #0078d7;
+  --subaccent_color: #005a9e;
   --main_color: #414141;
   --modal_color: #a5a5a565;
   --button_color: #0a7cdb40;
+  --button_red_color: #ff001540;
   --modal_focus_color: #a5a5a5;
   --slist-outline: #909191;
   --modal_placeholder_color: #494949;
@@ -107,24 +118,23 @@
   --background_loading_color: #e7e7e7;
   --titlebar_outline_color: #bbbbbb;
   --outline_color: #cccccc40;
+  --titlebar_outline: solid var(--titlebar_outline_color);
+  --outline: 3px solid var(--outline_color);
   --close_button_color: #ff0015;
+  --warning-color-transparent: #c4860040;
+  --warning-color: #c48600;
+  --success-color-transparent: #4ec40040;
+  --success-color: #4ec400;
+  --notice-color-transparent: #e7e7e740;
+  --notice-color: #e7e7e7;
+  --info-color-transparent: #e4e4e440;
+  --info-color: #e4e4e4;
+  --red-accent: #8a0000;
   --hover-color: #d1d1d1;
   --modal-hover-color: #636363;
   --holo_shadow_color: #2d2d2d40;
   --vignette: rgba(235, 235, 235, 0);
-  /* Файлы курсоров */
-  --cursor-pointer: url('/cursor/light/pointer.cur'), auto;
-  --cursor-hand: url('/cursor/light/hand.cur'), pointer;
-  --cursor-text: url('/cursor/light/text.cur'), text;
-  --cursor-forbidden: url('/cursor/light/forbidden.cur'), not-allowed;
-  --cursor-busy: url('/cursor/light/busy.ani'), wait;
-  --cursor-move: url('/cursor/light/move.cur'), move;
-  --cursor-size-ew: url('/cursor/light/size\ EW.cur'), ew-resize;
-  --cursor-size-ns: url('/cursor/light/size\ NS.cur'), ns-resize;
-  --cursor-size-nesw: url('/cursor/light/size\ NeSw.cur'), nesw-resize;
-  --cursor-size-nwse: url('/cursor/light/size\ NwSe.cur'), nwse-resize;
-  --cursor-crosshair: url('/cursor/light/crosshair.cur'), crosshair;
-  --cursor-help: url('/cursor/light/help.cur'), help;
+  --standart_shadow: 4px 4px 4px 0px #00000020;
 }
 
 /* Параметры страницы */
